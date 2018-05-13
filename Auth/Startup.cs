@@ -1,4 +1,6 @@
-﻿using Auth.Repository;
+﻿using Auth.Core;
+using Auth.Core.Interfaces;
+using Auth.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -21,29 +23,34 @@ namespace Auth
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
         {
-			// Adds services required for using options.
+			// Регистрируем настройки сервиса Auth
 			services.AddOptions();
+			services.Configure<AuthOptions>(Configuration.GetSection("AuthOptions"));
 
 			// Регистрация строк подключения к БД
 			services.AddDbContext<AuthDataContext>(options =>
 				options.UseSqlServer(Configuration.GetConnectionString("AuthData")));
 
-			// Register the Swagger generator, defining one or more Swagger documents
+			services.AddTransient<IAuthRepository, AuthRepository>();
+			services.AddTransient<ITokenController, TokenController>();
+			services.AddTransient<IAuthService, AuthService>();
+
+			services.AddMvc();
+
+			// Swagger
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1", new Info { Title = "Auth API", Version = "v1" });
 			});
-
-			services.AddMvc();
 		}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+			if (env.IsDevelopment())
+			{
+				app.UseDeveloperExceptionPage();
+			}
 
 			// Enable middleware to serve generated Swagger as a JSON endpoint.
 			app.UseSwagger();

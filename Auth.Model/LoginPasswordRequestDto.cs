@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Auth.Core.Model
+namespace Auth.Model
 {
 	/// <summary>
 	/// Данные для аутентификации по логину/паролю

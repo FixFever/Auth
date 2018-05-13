@@ -10,7 +10,8 @@ namespace Auth.Repository.Model
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public int Id { get; set; }
 		public DateTimeOffset DateTime { get; set; }
-		public Guid UserId { get; set; }
+		public int AdminUserId { get; set; }
+		public int UserId { get; set; }
 		public string Text { get; set; }
 
 		public class ChangeLogMap : IEntityTypeConfiguration<ChangeLog>

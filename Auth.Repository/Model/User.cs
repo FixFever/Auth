@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Auth.Core.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
 
 namespace Auth.Repository.Model
 {
@@ -9,7 +9,7 @@ namespace Auth.Repository.Model
 	/// </summary>
 	public class User
     {
-		public Guid Id { get; set; }
+		public int Id { get; set; }
 
 		public string Login { get; set; }
 
@@ -31,5 +31,17 @@ namespace Auth.Repository.Model
 				builder.HasKey(t => t.Id);
 			}
 		}
+
+		/// <summary>
+		/// Dto возвращаемый сервисом
+		/// </summary>
+		public UserDto Dto => new UserDto
+		{
+			Id = Id,
+			FullName = FullName,
+			Login = Login,
+			IsActive = IsActive,
+			IsAdmin = IsAdmin
+		};
 	}
 }

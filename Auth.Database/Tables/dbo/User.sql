@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[User](
-	[Id]			UNIQUEIDENTIFIER	NOT NULL,
+	[Id]			INT					NOT NULL	IDENTITY,
 	[FullName]		NVARCHAR (255)		NOT NULL,
 	[Login]			NVARCHAR (55) 		NOT NULL,
-	[Hash]			NVARCHAR (255)		NOT NULL,
+	[Password]			NVARCHAR (255)		NOT NULL,
 	[Salt]			NVARCHAR (255)		NOT NULL,
 	[IsActive]		BIT					NOT NULL	DEFAULT(1),
 	[IsAdmin]		BIT					NOT NULL	DEFAULT(0),
