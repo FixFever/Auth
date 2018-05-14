@@ -1,7 +1,7 @@
-﻿using Auth.Core;
+﻿using System.Net;
+using Auth.Core;
 using Auth.Core.Model;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Auth.Controllers
 {

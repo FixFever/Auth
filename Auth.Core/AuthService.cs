@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Data.SqlClient;
+using System.Data.SqlTypes;
+using System.Runtime.CompilerServices;
 using Auth.Core.Interfaces;
 using Auth.Core.Model;
 using Microsoft.Extensions.Options;
@@ -12,12 +15,15 @@ namespace Auth.Core
 	{
 		private readonly IAuthRepository _authRepository;
 		private readonly ITokenController _tokenController;
+		private readonly ILogRepository _logRepository;
 		private readonly AuthOptions _authOptions;
 
-		public AuthService(IAuthRepository authRepository, ITokenController tokenController, IOptions<AuthOptions> authOptions)
+		public AuthService(IAuthRepository authRepository, ITokenController tokenController,
+			ILogRepository logRepository, IOptions<AuthOptions> authOptions)
 		{
 			_authRepository = authRepository ?? throw new ArgumentNullException(nameof(authRepository));
 			_tokenController = tokenController ?? throw new ArgumentNullException(nameof(tokenController));
+			_logRepository = logRepository ?? throw new ArgumentNullException(nameof(logRepository));
 			_authOptions = authOptions.Value;
 		}
 
@@ -26,7 +32,7 @@ namespace Auth.Core
 		/// </summary>
 		public Result<Guid?> Login(string login, string password)
 		{
-			return DoWithExceptionHandling(() =>
+			return DoWithExceptionHandling(null, login, () =>
 		   {
 			   if (string.IsNullOrWhiteSpace(login))
 				   return Result<Guid?>.Fail(Errors.LoginIsEmpty);
@@ -54,7 +60,13 @@ namespace Auth.Core
 		/// </summary>
 		public Result<bool> CreateUser(UserRequestDto user, Guid token)
 		{
-			return DoWithCheckAdminPermission(token, () => _authRepository.CreateUser(user));
+			return DoWithCheckAdminPermissionAndLog(token, null, user, () =>
+			{
+				if (user == null || string.IsNullOrEmpty(user.Login))
+					return Result<bool>.Fail(Errors.RequestIsEmpty);
+
+				return _authRepository.CreateUser(user);
+			});
 		}
 
 		/// <summary>
@@ -62,7 +74,7 @@ namespace Auth.Core
 		/// </summary>
 		public Result<UserDto[]> GetAllUsers(Guid token)
 		{
-			return DoWithCheckTokenIsActual(token, _authRepository.GetAllUsers);
+			return DoWithCheckTokenIsActual(token, null, _authRepository.GetAllUsers);
 		}
 
 		/// <summary>
@@ -70,7 +82,7 @@ namespace Auth.Core
 		/// </summary>
 		public Result<UserDto> GetUser(int userId, Guid token)
 		{
-			return DoWithCheckTokenIsActual(token, () => _authRepository.GetUserById(userId));
+			return DoWithCheckTokenIsActual(token, userId, () => _authRepository.GetUserById(userId));
 		}
 
 		/// <summary>
@@ -78,7 +90,7 @@ namespace Auth.Core
 		/// </summary>
 		public Result<bool> SetUserIsActive(int userId, bool IsActive, Guid token)
 		{
-			return DoWithCheckAdminPermission(token, () =>
+			return DoWithCheckAdminPermissionAndLog(token, userId, IsActive, () =>
 			{
 				var result = _authRepository.SetUserIsActive(userId, IsActive);
 
@@ -99,7 +111,7 @@ namespace Auth.Core
 		/// </summary>
 		public Result<bool> SetUserIsAdmin(int userId, bool IsAdmin, Guid token)
 		{
-			return DoWithCheckAdminPermission(token, () => _authRepository.SetUserIsAdmin(userId, IsAdmin));
+			return DoWithCheckAdminPermissionAndLog(token, userId, IsAdmin, () => _authRepository.SetUserIsAdmin(userId, IsAdmin));
 		}
 
 		/// <summary>
@@ -107,7 +119,20 @@ namespace Auth.Core
 		/// </summary>
 		public Result<bool> SetUserPassword(int userId, string password, Guid token)
 		{
-			return DoWithCheckAdminPermission(token, () => _authRepository.SetUserPassword(userId, password));
+			return DoWithCheckAdminPermissionAndLog(token, userId, null, () =>
+			{
+				var result = _authRepository.SetUserPassword(userId, password);
+
+				// При успешной смене пароля сбрасываем токен пользователя
+				if (result.IsSuccess)
+				{
+					var userToken = _tokenController.GetTokenForUser(userId);
+					if (userToken.HasValue)
+						_tokenController.RemoveToken(userToken.Value);
+				};
+
+				return result;
+			});
 		}
 
 		/// <summary>
@@ -115,80 +140,120 @@ namespace Auth.Core
 		/// </summary>
 		public Result<bool> UpdateUser(int userId, UserRequestDto user, Guid token)
 		{
-			return DoWithCheckAdminPermission(token, () => _authRepository.UpdateUser(userId, user));
+			return DoWithCheckAdminPermissionAndLog(token, userId, user, () =>
+			{
+				if (user == null || string.IsNullOrEmpty(user.Login))
+					return Result<bool>.Fail(Errors.RequestIsEmpty);
+
+				return _authRepository.UpdateUser(userId, user);
+			});
 		}
 
 		/// <summary>
 		/// Выполнить операцию с проверкой актуальности токена
 		/// </summary>
-		private Result<T> DoWithCheckTokenIsActual<T>(Guid token, Func<Result<T>> action)
+		private Result<T> DoWithCheckTokenIsActual<T>(Guid token, object data, Func<Result<T>> action, [CallerMemberName] string methodName = null)
 		{
-			return DoWithExceptionHandling<T>(() =>
+			var checkTokenResult = DoWithExceptionHandling(null, token, () =>
 			{
 				if (token == Guid.Empty)
-					return Result<T>.Fail(Errors.TokenIsEmpty);
+					return Result<int>.Fail(Errors.TokenIsEmpty);
 
 				// Для токена рут-пользователя проверка не нужна
 				if (token == _authOptions.RootToken)
-					return action();
+					return Result<int>.Success(0);
 
 				var tokenIsActual = _tokenController.CheckToken(token);
 
 				if (!tokenIsActual)
-					return Result<T>.Fail(Errors.TokenIsNonActual);
+					return Result<int>.Fail(Errors.TokenIsNonActual);
 
-				// Выполняем действие
-				return action();
-			});
+				return Result<int>.Success(_tokenController.GetUserId(token));
+			}, methodName);
+
+			if (!checkTokenResult.IsSuccess)
+				return Result<T>.Fail(checkTokenResult.Error);
+
+			var userId = checkTokenResult.Data;
+
+			// Выполняем действие
+			return DoWithExceptionHandling(userId, data, action, methodName);
 		}
 
 		/// <summary>
 		/// Выполнить операцию с проверкой админских прав
 		/// </summary>
-		private Result<T> DoWithCheckAdminPermission<T>(Guid token, Func<Result<T>> action)
+		private Result<T> DoWithCheckAdminPermissionAndLog<T>(Guid adminToken, int? userId, object data, Func<Result<T>> action, [CallerMemberName] string methodName = null)
 		{
-			return DoWithExceptionHandling<T>(() =>
+			var checkTokenResult = DoWithExceptionHandling(null, adminToken, () =>
 			{
-				if (token == Guid.Empty)
-					return Result<T>.Fail(Errors.TokenIsEmpty);
+				if (adminToken == Guid.Empty)
+					return Result<int>.Fail(Errors.TokenIsEmpty);
 
 				// Для токена рут-пользователя проверка не нужна
-				if (token == _authOptions.RootToken)
-					return action();
+				if (adminToken == _authOptions.RootToken)
+					return Result<int>.Success(0);
 
-				var userId = _tokenController.GetUserId(token);
+				var adminId = _tokenController.GetUserId(adminToken);
 
-				var getUserResult = _authRepository.GetUserById(userId);
+				var getUserResult = _authRepository.GetUserById(adminId);
 
 				if (!getUserResult.IsSuccess)
-					return Result<T>.Fail(getUserResult.Error);
+					return Result<int>.Fail(getUserResult.Error);
 
-				var user = getUserResult.Data;
+				var adminUser = getUserResult.Data;
 
-				if (!user.IsAdmin)
-					return Result<T>.Fail(Errors.AccessDenied);
+				if (!adminUser.IsAdmin)
+					return Result<int>.Fail(Errors.AccessDenied);
 
 				// Выполняем действие
-				return action();
-			});
-		}
+				return Result<int>.Success(adminId);
+			}, methodName);
 
+			if (!checkTokenResult.IsSuccess)
+				return Result<T>.Fail(checkTokenResult.Error);
+
+			int adminUserId = checkTokenResult.Data;
+
+			// Выполняем действие
+			return DoWithExceptionHandling(adminUserId, data, () =>
+			{
+				var actionResult = action();
+
+				if (actionResult.IsSuccess)
+					_logRepository.LogAdminAction(adminUserId, userId, data, methodName);
+
+				return actionResult;
+			}, methodName);
+		}
+		
 		/// <summary>
 		/// Выполнить операцию с обработкой исключений
 		/// </summary>
-		private Result<T> DoWithExceptionHandling<T>(Func<Result<T>> action)
+		private Result<T> DoWithExceptionHandling<T>(int? userId, object data, Func<Result<T>> action, [CallerMemberName] string methodName = null)
 		{
 			try
 			{
 				// Выполняем действие
-				return action();
+				var result = action();
+				if (!result.IsSuccess)
+					_logRepository.LogError(userId, result.Error, data, methodName);
+
+				return result;
 			}
 			catch (AuthException ex)
 			{
+				_logRepository.LogError(userId, ex.ErrorCodeWithDescription, data, methodName);
 				return Result<T>.Fail(ex.ErrorCodeWithDescription);
+			}
+			catch (SqlException ex)
+			{
+				_logRepository.LogException(userId, ex, data, methodName);
+				return Result<T>.Fail(Errors.ConnectToDbError);
 			}
 			catch (Exception ex)
 			{
+				_logRepository.LogException(userId, ex, data, methodName);
 				return Result<T>.Fail("Необработанное исключение", ex);
 			}
 		}

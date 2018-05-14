@@ -14,7 +14,7 @@ namespace Auth.Repository
 		{
 			base.OnModelCreating(modelBuilder);
 			modelBuilder.ApplyConfiguration(new User.UserMap());
-			modelBuilder.ApplyConfiguration(new ChangeLog.ChangeLogMap());
+			modelBuilder.ApplyConfiguration(new Log.LogMap());
 		}
 	}
 }

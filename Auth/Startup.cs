@@ -32,6 +32,7 @@ namespace Auth
 				options.UseSqlServer(Configuration.GetConnectionString("AuthData")));
 
 			services.AddTransient<IAuthRepository, AuthRepository>();
+	        services.AddTransient<ILogRepository, LogRepository>();
 			services.AddTransient<ITokenController, TokenController>();
 			services.AddTransient<IAuthService, AuthService>();
 

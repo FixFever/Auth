@@ -62,7 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\dbo\User.sql" />
-    <Build Include="Tables\dbo\ChangeLog.sql" />
+    <Build Include="Tables\dbo\Log.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Auth.Database.publish.xml" />
