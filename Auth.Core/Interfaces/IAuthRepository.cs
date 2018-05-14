@@ -17,7 +17,7 @@ namespace Auth.Core.Interfaces
 		/// <summary>
 		/// Добавить нового пользователя в хранилище
 		/// </summary>
-		Result<bool> CreateUser(UserRequestDto user);
+		Result<UserDto> CreateUser(UserRequestDto user);
 
 		/// <summary>
 		/// Сменить пароль пользователя

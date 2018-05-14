@@ -9,13 +9,13 @@ using System.Net;
 namespace Auth.Controllers
 {
 	[Route("api")]
-	public class PublicController : BaseController
+	public class AuthenticationController : BaseController
 	{
-		private readonly IAuthService _authService;
+		private readonly IAuthenticationService _authenticationService;
 
-		public PublicController(IAuthService authService)
+		public AuthenticationController(IAuthenticationService authenticationService)
 		{
-			_authService = authService;
+			_authenticationService = authenticationService;
 		}
 		
 		/// <summary>
@@ -24,10 +24,9 @@ namespace Auth.Controllers
 		[HttpPost("Login")]
 		[SwaggerOperation(Tags = new[] { Api.Public })]
 		[SwaggerResponse((int)HttpStatusCode.OK, typeof(Result<Guid>), "Авторизация по логину и паролю, возвращает токен авторизации")]
-		[SwaggerResponse((int)HttpStatusCode.Unauthorized, typeof(Result<Guid>), "Ошибка авторизации")]
 		public IActionResult Login([Login] string login, [Password] string password)
 		{
-			var result = _authService.Login(login, password);
+			var result = _authenticationService.Login(login, password);
 
 			return ConvertToActionResult(result);
 		}

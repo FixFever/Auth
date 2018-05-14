@@ -35,7 +35,7 @@ namespace Auth.Repository
 			return Result<UserDto>.Success(getUsetResult.Data.Dto);
 		}
 
-		public Result<bool> CreateUser(UserRequestDto user)
+		public Result<UserDto> CreateUser(UserRequestDto user)
 		{
 			if (user == null) throw new ArgumentNullException("user");
 
@@ -43,14 +43,17 @@ namespace Auth.Repository
 			{
 				if (db.Set<User>()
 						.FirstOrDefault(u => u.Login.Equals(user.Login, StringComparison.InvariantCultureIgnoreCase)) != null)
-					return Result<bool>.Fail(Errors.UserAlreadyExists);
+					return Result<UserDto>.Fail(Errors.UserAlreadyExists);
 
 				var newUser = MapNewUser(user);
 
 				db.Set<User>().Add(newUser);
 				db.SaveChanges();
 
-				return Result<bool>.Success(true);
+				var createdUser = db.Set<User>()
+					.Single(u => u.Login.Equals(user.Login, StringComparison.InvariantCultureIgnoreCase));
+
+				return Result<UserDto>.Success(createdUser.Dto);
 			});
 		}
 
@@ -75,7 +78,7 @@ namespace Auth.Repository
 
 				user.Password = PasswordUtils.CreatePasswordHash(password, user.Salt);
 				db.SaveChanges();
-				
+
 				return Result<bool>.Success(true);
 			});
 		}
@@ -88,18 +91,19 @@ namespace Auth.Repository
 				if (record == null)
 					return Result<bool>.Fail(Errors.UserNotFound);
 
-				if (db.Set<User>()
+				if (!record.Login.Equals(user.Login, StringComparison.InvariantCultureIgnoreCase) &&
+					db.Set<User>()
 						.FirstOrDefault(u => u.Login.Equals(user.Login, StringComparison.InvariantCultureIgnoreCase)) != null)
 					return Result<bool>.Fail(Errors.UserAlreadyExists);
 
 				record.Login = user.Login;
 				record.FullName = user.FullName;
 				db.SaveChanges();
-				
+
 				return Result<bool>.Success(true);
 			});
 		}
-		
+
 		public Result<bool> SetUserIsAdmin(int userId, bool IsAdmin)
 		{
 			return WorkWithDb(db =>
@@ -107,7 +111,7 @@ namespace Auth.Repository
 				var record = db.Set<User>().FirstOrDefault(u => u.Id == userId);
 				if (record == null)
 					return Result<bool>.Fail(Errors.UserNotFound);
-				
+
 				record.IsAdmin = IsAdmin;
 				db.SaveChanges();
 
@@ -129,7 +133,7 @@ namespace Auth.Repository
 				return Result<bool>.Success(true);
 			});
 		}
-		
+
 		public Result<UserDto> GetUserById(int userId)
 		{
 			var result = WorkWithDb(db =>
@@ -143,7 +147,7 @@ namespace Auth.Repository
 
 				return Result<UserDto>.Success(user.Dto);
 			});
-			
+
 			return result;
 		}
 

@@ -4,29 +4,14 @@ using System;
 namespace Auth.Core.Interfaces
 {
 	/// <summary>
-	/// Сервис Auth
+	/// Сервис для действий администраторов
 	/// </summary>
-	public interface IAuthService
+	public interface IAdminService
 	{
-		/// <summary>
-		/// Возвращает информацию о Пользователе, если удалось пройти аутентификацию по логину и паролю
-		/// </summary>
-		Result<Guid?> Login(string login, string password);
-
-		/// <summary>
-		/// Возвращает список всех пользователей
-		/// </summary>
-		Result<UserDto[]> GetAllUsers(Guid token);
-
-		/// <summary>
-		/// Возвращает данные о пользователе по его id
-		/// </summary>
-		Result<UserDto> GetUser(int userId, Guid token);
-
 		/// <summary>
 		/// Добавить нового пользователя в хранилище
 		/// </summary>
-		Result<bool> CreateUser(UserRequestDto user, Guid token);
+		Result<UserDto> CreateUser(UserRequestDto user, Guid token);
 
 		/// <summary>
 		/// Сменить пароль пользователя

@@ -1,5 +1,6 @@
 ﻿using Auth.Core;
 using Auth.Core.Interfaces;
+using Auth.Core.Services;
 using Auth.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,7 +35,10 @@ namespace Auth
 			services.AddTransient<IAuthRepository, AuthRepository>();
 	        services.AddTransient<ILogRepository, LogRepository>();
 			services.AddTransient<ITokenController, TokenController>();
-			services.AddTransient<IAuthService, AuthService>();
+
+			services.AddTransient<IAdminService, AdminService>();
+	        services.AddTransient<IUserService, UserService>();
+	        services.AddTransient<IAuthenticationService, AuthenticationService>();
 
 			services.AddMvc();
 
