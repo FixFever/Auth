@@ -34,7 +34,7 @@ namespace Auth.Repository
 				db.SaveChanges();
 			});
 		}
-		
+
 		/// <inheritdoc />
 		public void LogError(int? userId, KeyValuePair<string, string> error, object data, string methodName)
 		{
@@ -82,8 +82,8 @@ namespace Auth.Repository
 						DateTime = DateTimeOffset.Now,
 						UserId = userId,
 						Action = methodName,
-						Text = (data == null ? null : $"Request: {JsonConvert.SerializeObject(data)} ") + 
-						       $"{exception.GetType()}: {exception.Message}: {exception.StackTrace}"
+						Text = (data == null ? null : $"Request: {JsonConvert.SerializeObject(data)} ") +
+							   $"{exception.GetType()}: {exception.Message}: {exception.StackTrace}"
 					});
 
 				db.SaveChanges();

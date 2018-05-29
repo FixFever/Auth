@@ -7,7 +7,7 @@ namespace Auth.Core.Model
 	/// </summary>
 	[DataContract]
 	public class UserRequestDto
-    {
+	{
 		/// <summary>
 		/// Логин пользователя
 		/// </summary>

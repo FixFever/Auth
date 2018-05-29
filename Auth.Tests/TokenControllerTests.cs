@@ -19,7 +19,7 @@ namespace Auth.Tests
 				.Return(new AuthOptions { TokenTimeToLife = TimeSpan.FromMilliseconds(100) }); // Время жизни токена - 100 мс
 
 			var tokenController =
-				new TokenController(options); 
+				new TokenController(options);
 
 			var userGuid = 123456;
 
@@ -77,7 +77,7 @@ namespace Auth.Tests
 			var options = MockRepository.GenerateStub<IOptions<AuthOptions>>();
 			options.Expect(o => o.Value)
 				.Return(new AuthOptions { TokenTimeToLife = TimeSpan.FromHours(1) }); // Время жизни токена - 1 час
-			
+
 			var tokenController = new TokenController(options);
 
 			// пробуем удалить несуществующий токен

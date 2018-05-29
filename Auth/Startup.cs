@@ -12,7 +12,7 @@ using Swashbuckle.AspNetCore.Swagger;
 namespace Auth
 {
 	public class Startup
-    {
+	{
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
@@ -23,7 +23,7 @@ namespace Auth
 		// This method gets called by the runtime. Use this method to add services to the container.
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
-        {
+		{
 			// Регистрируем настройки сервиса Auth
 			services.AddOptions();
 			services.Configure<AuthOptions>(Configuration.GetSection("AuthOptions"));
@@ -33,12 +33,12 @@ namespace Auth
 				options.UseSqlServer(Configuration.GetConnectionString("AuthData")));
 
 			services.AddTransient<IAuthRepository, AuthRepository>();
-	        services.AddTransient<ILogRepository, LogRepository>();
+			services.AddTransient<ILogRepository, LogRepository>();
 			services.AddTransient<ITokenController, TokenController>();
 
 			services.AddTransient<IAdminService, AdminService>();
-	        services.AddTransient<IUserService, UserService>();
-	        services.AddTransient<IAuthenticationService, AuthenticationService>();
+			services.AddTransient<IUserService, UserService>();
+			services.AddTransient<IAuthenticationService, AuthenticationService>();
 
 			services.AddMvc();
 
@@ -49,9 +49,9 @@ namespace Auth
 			});
 		}
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
+		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+		{
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -68,5 +68,5 @@ namespace Auth
 
 			app.UseMvc();
 		}
-    }
+	}
 }

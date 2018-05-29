@@ -8,7 +8,7 @@ namespace Auth.Repository.Model
 	/// Данные пользователя для внутреннего использования сервисом
 	/// </summary>
 	public class User
-    {
+	{
 		public int Id { get; set; }
 
 		public string Login { get; set; }
@@ -18,7 +18,7 @@ namespace Auth.Repository.Model
 		public string Password { get; set; }
 
 		public string Salt { get; set; }
-		
+
 		public bool IsActive { get; set; }
 
 		public bool IsAdmin { get; set; }

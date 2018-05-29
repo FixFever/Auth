@@ -7,15 +7,15 @@ namespace Auth.Core.Interfaces
 	/// Сервис с действиями, доступным обычным пользователям
 	/// </summary>
 	public interface IUserService
-    {
-	    /// <summary>
-	    /// Возвращает список всех пользователей
-	    /// </summary>
-	    Result<UserDto[]> GetAllUsers(Guid token);
+	{
+		/// <summary>
+		/// Возвращает список всех пользователей
+		/// </summary>
+		Result<UserDto[]> GetAllUsers(Guid token);
 
-	    /// <summary>
-	    /// Возвращает данные о пользователе по его id
-	    /// </summary>
-	    Result<UserDto> GetUser(int userId, Guid token);
+		/// <summary>
+		/// Возвращает данные о пользователе по его id
+		/// </summary>
+		Result<UserDto> GetUser(int userId, Guid token);
 	}
 }

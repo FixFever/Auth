@@ -5,13 +5,13 @@ using Microsoft.Extensions.Options;
 
 namespace Auth.Core.Services
 {
-    public class AuthenticationService : BaseService, IAuthenticationService
-    {
-	    /// <inheritdoc />
-	    public AuthenticationService(IAuthRepository authRepository, ITokenController tokenController, ILogRepository logRepository, IOptions<AuthOptions> authOptions) 
-		    : base(authRepository, tokenController, logRepository, authOptions)
-	    {
-	    }
+	public class AuthenticationService : BaseService, IAuthenticationService
+	{
+		/// <inheritdoc />
+		public AuthenticationService(IAuthRepository authRepository, ITokenController tokenController, ILogRepository logRepository, IOptions<AuthOptions> authOptions)
+			: base(authRepository, tokenController, logRepository, authOptions)
+		{
+		}
 
 		/// <summary>
 		/// Возвращает информацию о Пользователе, если удалось пройти аутентификацию по логину и паролю
@@ -40,5 +40,5 @@ namespace Auth.Core.Services
 				return Result<Guid?>.Success(token);
 			});
 		}
-    }
+	}
 }

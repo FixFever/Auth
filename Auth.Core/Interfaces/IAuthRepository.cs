@@ -33,7 +33,7 @@ namespace Auth.Core.Interfaces
 		/// Назначает/сбрасывает права админа
 		/// </summary>
 		Result<bool> SetUserIsAdmin(int userId, bool IsAdmin);
-		
+
 		/// <summary>
 		/// Блокирует/разблокирует пользователя
 		/// </summary>

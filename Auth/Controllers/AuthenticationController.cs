@@ -17,7 +17,7 @@ namespace Auth.Controllers
 		{
 			_authenticationService = authenticationService;
 		}
-		
+
 		/// <summary>
 		/// Авторизация
 		/// </summary>

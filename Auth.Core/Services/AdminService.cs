@@ -12,7 +12,7 @@ namespace Auth.Core.Services
 	public class AdminService : BaseService, IAdminService
 	{
 		/// <inheritdoc />
-		public AdminService(IAuthRepository authRepository, ITokenController tokenController, ILogRepository logRepository, IOptions<AuthOptions> authOptions) 
+		public AdminService(IAuthRepository authRepository, ITokenController tokenController, ILogRepository logRepository, IOptions<AuthOptions> authOptions)
 			: base(authRepository, tokenController, logRepository, authOptions)
 		{
 		}
@@ -95,7 +95,7 @@ namespace Auth.Core.Services
 			});
 		}
 
-		
+
 		/// <summary>
 		/// Выполнить операцию с проверкой админских прав
 		/// </summary>
@@ -121,7 +121,7 @@ namespace Auth.Core.Services
 
 				if (!adminUser.IsAdmin)
 					return Result<int>.Fail(Errors.AccessDenied);
-				
+
 				return Result<int>.Success(adminId);
 			}, methodName);
 

@@ -16,7 +16,7 @@ namespace Auth.Controllers
 				result.Error.Key == Errors.WrongLoginOrPassword.Key ||
 				result.Error.Key == Errors.TokenIsNonActual.Key)
 				return StatusCode((int)HttpStatusCode.Unauthorized, result);
-			
+
 			if (result.Error.Key == Errors.ConnectToDbError.Key ||
 				result.Error.Key == Errors.UnexpectedError.Key)
 				return StatusCode((int)HttpStatusCode.InternalServerError, result);

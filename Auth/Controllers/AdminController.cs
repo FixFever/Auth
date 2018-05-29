@@ -35,7 +35,7 @@ namespace Auth.Controllers
 		/// </summary>
 		[HttpPut("{userId:int}")]
 		[SwaggerOperation(Tags = new[] { Api.Admin })]
-		[SwaggerResponse((int)HttpStatusCode.OK, typeof(Result<bool>), "Изменяет значения полей учетной записи пользователя")]
+		[SwaggerResponse((int)HttpStatusCode.OK, typeof(Result<UserDto>), "Изменяет значения полей учетной записи пользователя")]
 		public IActionResult UpdateUser(int userId, [FromBody] UserRequestDto user, [Token, GuidBinder] Guid token)
 		{
 			var result = _adminService.UpdateUser(userId, user, token);
@@ -59,7 +59,7 @@ namespace Auth.Controllers
 		/// </summary>
 		[HttpPut("{userId:int}/IsActive")]
 		[SwaggerOperation(Tags = new[] { Api.Admin })]
-		[SwaggerResponse((int)HttpStatusCode.OK, typeof(Result<bool>), "Заблокировать/разблокировать пользователя")]
+		[SwaggerResponse((int)HttpStatusCode.OK, typeof(Result<UserDto>), "Заблокировать/разблокировать пользователя")]
 		public IActionResult SetIsActive([FromBody] BooleanRequest request, int userId, [Token, GuidBinder] Guid token)
 		{
 			var result = _adminService.SetUserIsActive(userId, request.Value, token);
@@ -71,7 +71,7 @@ namespace Auth.Controllers
 		/// </summary>
 		[HttpPut("{userId:int}/IsAdmin")]
 		[SwaggerOperation(Tags = new[] { Api.Admin })]
-		[SwaggerResponse((int)HttpStatusCode.OK, typeof(Result<bool>), "Назначить/сбросить права админа")]
+		[SwaggerResponse((int)HttpStatusCode.OK, typeof(Result<UserDto>), "Назначить/сбросить права админа")]
 		public IActionResult SetIsAdmin([FromBody] BooleanRequest request, int userId, [Token, GuidBinder] Guid token)
 		{
 			var result = _adminService.SetUserIsAdmin(userId, request.Value, token);

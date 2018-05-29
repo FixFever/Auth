@@ -11,7 +11,7 @@ namespace Auth.Core
 		/// Время жизни токена
 		/// </summary>
 		public TimeSpan TokenTimeToLife { get; set; }
-		
+
 		/// <summary>
 		/// Логин рута
 		/// </summary>

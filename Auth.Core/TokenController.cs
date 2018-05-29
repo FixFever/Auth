@@ -37,7 +37,7 @@ namespace Auth.Core
 			// Создаём новый токен
 			var tokenInfo = new TokenInfo(userId, _timeToLife);
 			Tokens.AddOrUpdate(tokenInfo.Token, tokenInfo, (key, oldToken) => tokenInfo);
-			
+
 			return tokenInfo.Token;
 		}
 

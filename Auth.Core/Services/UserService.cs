@@ -9,10 +9,10 @@ namespace Auth.Core.Services
 	/// <summary>
 	/// Сервис с действиями, доступным обычным пользователям
 	/// </summary>
-    public class UserService : BaseService, IUserService
+	public class UserService : BaseService, IUserService
 	{
 		/// <inheritdoc />
-		public UserService(IAuthRepository authRepository, ITokenController tokenController, ILogRepository logRepository, IOptions<AuthOptions> authOptions) 
+		public UserService(IAuthRepository authRepository, ITokenController tokenController, ILogRepository logRepository, IOptions<AuthOptions> authOptions)
 			: base(authRepository, tokenController, logRepository, authOptions)
 		{
 		}
